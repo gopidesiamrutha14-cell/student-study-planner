@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Study Planner</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>Student Study Planner</h1>
+        <p>Plan your studies. Track your progress.</p>
+    </header>
+
+    <main class="container">
+        <section class="dashboard">
+            <div class="card">
+                <h2>Total Tasks</h2>
+                <p id="totalTasks">0</p>
+            </div>
+            <div class="card">
+                <h2>Pending Tasks</h2>
+                <p id="pendingTasks">0</p>
+            </div>
+            <div class="card">
+                <h2>Completed Tasks</h2>
+                <p id="completedTasks">0</p>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Add a Study Task</h2>
+            <form id="taskForm">
+                <input id="taskName" type="text"
+                       placeholder="Task name" required>
+                <input id="subject" type="text"
+                       placeholder="Subject" required>
+                <input id="deadline" type="date" required>
+                <button type="submit">Add Task</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>My Tasks</h2>
+            <div id="taskList">Loading tasks...</div>
+        </section>
+    </main>
+
+    <script src="/script.js"></script>
+</body>
+</html>
+
