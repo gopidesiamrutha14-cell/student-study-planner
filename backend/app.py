@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
 import os
+import logging
 
 app = Flask(
     __name__,
@@ -11,6 +12,8 @@ app = Flask(
 )
 
 CORS(app)
+logging.basicConfig(level=logging.INFO)
+
 
 # Connect to hosted Aiven MySQL
 def get_db_connection():
@@ -25,11 +28,25 @@ def get_db_connection():
     )
 
 
+# Return database errors as JSON instead of HTML
+@app.errorhandler(mysql.connector.Error)
+def handle_database_error(error):
+    app.logger.exception("Database operation failed")
+    return jsonify({
+        "error": "Database operation failed. Check the Render logs."
+    }), 500
 
-# Open the frontend homepage
+
+# Open frontend homepage
 @app.route("/")
 def home():
     return app.send_static_file("index.html")
+
+
+# Optional health check
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
 
 
 # Get all study tasks
@@ -67,8 +84,10 @@ def add_task():
     subject = data.get("subject", "")
     deadline = data.get("deadline") or None
 
-    if not task_name or not task_name.strip():
-        return jsonify({"error": "Task name is required"}), 400
+    if not isinstance(task_name, str) or not task_name.strip():
+        return jsonify({
+            "error": "Task name is required"
+        }), 400
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -98,7 +117,9 @@ def update_task(task_id):
     status = data.get("status")
 
     if status not in ["Pending", "Completed"]:
-        return jsonify({"error": "Invalid status"}), 400
+        return jsonify({
+            "error": "Invalid status"
+        }), 400
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -112,9 +133,13 @@ def update_task(task_id):
         conn.commit()
 
         if cursor.rowcount == 0:
-            return jsonify({"error": "Task not found"}), 404
+            return jsonify({
+                "error": "Task not found"
+            }), 404
 
-        return jsonify({"message": "Task updated successfully"})
+        return jsonify({
+            "message": "Task updated successfully"
+        })
 
     finally:
         cursor.close()
@@ -136,9 +161,13 @@ def delete_task(task_id):
         conn.commit()
 
         if cursor.rowcount == 0:
-            return jsonify({"error": "Task not found"}), 404
+            return jsonify({
+                "error": "Task not found"
+            }), 404
 
-        return jsonify({"message": "Task deleted successfully"})
+        return jsonify({
+            "message": "Task deleted successfully"
+        })
 
     finally:
         cursor.close()
@@ -166,6 +195,7 @@ def dashboard():
     finally:
         cursor.close()
         conn.close()
+
 
 if __name__ == "__main__":
     app.run(
