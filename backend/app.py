@@ -12,16 +12,18 @@ app = Flask(
 
 CORS(app)
 
-
-# Connect to MySQL database
+# Connect to hosted Aiven MySQL
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password=os.environ.get("DB_PASSWORD", "admin"),
-        database="student_study_planner",
-        port=3306
+        host=os.environ["DB_HOST"],
+        port=int(os.environ.get("DB_PORT", "15835")),
+        user=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        database=os.environ.get("DB_NAME", "defaultdb"),
+        ssl_disabled=False,
+        connection_timeout=15
     )
+
 
 
 # Open the frontend homepage
@@ -165,6 +167,9 @@ def dashboard():
         cursor.close()
         conn.close()
 
-
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "5000")),
+        debug=False
+    )
